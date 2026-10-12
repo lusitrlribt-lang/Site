@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101322">
+<title>LUIS — A IA Verdadeira PRO</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0e18;--panel:#14192a;--panel2:#1a2035;--line:#2a3450;--text:#f4f6ff;--muted:#a8b1ca;--accent:#8b7cff;--accent2:#39d6c5}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#20244b 0,#0b0e18 55%);color:var(--text);font:16px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+header{padding:22px 16px 14px;text-align:center}header .logo{display:inline-grid;place-items:center;width:54px;height:54px;border-radius:17px;background:linear-gradient(135deg,var(--accent),var(--accent2));font-size:26px;font-weight:900;color:#080b14}
+h1{margin:10px 0 4px;font-size:clamp(25px,6vw,34px)}header p{margin:0;color:var(--muted);font-size:14px}
+main{max-width:850px;margin:auto;padding:12px 14px 28px}.notice{border:1px solid #4a4675;background:#201e3b;border-radius:13px;padding:12px 14px;color:#dedbff;font-size:13px;line-height:1.45;margin-bottom:14px}
+.tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:14px}.tool{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:14px;padding:13px 8px;min-height:76px;text-align:left;cursor:pointer}.tool b{display:block;font-size:14px;margin-top:7px}.tool span{font-size:22px}
+.chat{background:rgba(20,25,42,.95);border:1px solid var(--line);border-radius:18px;overflow:hidden}.chathead{padding:13px 15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.status{font-size:12px;color:var(--accent2)}#messages{padding:14px;display:flex;flex-direction:column;gap:12px;min-height:220px;max-height:48vh;overflow-y:auto}.msg{max-width:92%;padding:12px 14px;border-radius:15px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}.bot{align-self:flex-start;background:var(--panel2);border:1px solid var(--line)}.user{align-self:flex-end;background:#34305d;border:1px solid #514a88}.composer{padding:12px;border-top:1px solid var(--line)}textarea{display:block;width:100%;resize:vertical;min-height:76px;max-height:180px;border-radius:12px;border:1px solid var(--line);background:#0c1020;color:var(--text);padding:12px;font:inherit;outline:none}textarea:focus{border-color:var(--accent)}.actions{display:flex;gap:8px;margin-top:9px}.btn{border:0;border-radius:11px;padding:11px 15px;font:inherit;font-weight:700;cursor:pointer}.primary{background:linear-gradient(110deg,var(--accent),#6f8cff);color:white;flex:1}.secondary{background:#252c43;color:var(--text)}.btn:disabled{opacity:.55;cursor:wait}.small{font-size:12px;color:var(--muted);line-height:1.5;margin:12px 2px}.result-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.hidden{display:none!important}
+@media(max-width:420px){.tools{grid-template-columns:repeat(3,minmax(0,1fr))}.tool{padding:10px 6px}.tool b{font-size:12px}.msg{max-width:98%}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">L</div>
+  <h1>LUIS — A IA Verdadeira PRO</h1>
+  <p>Assistente de conversa, criação e desenvolvimento</p>
+</header>
+<main>
+  <div class="notice"><strong>Importante:</strong> esta página é a interface HTML. Para respostas de IA reais, geração de vídeos e integração com Roblox, conecte um servidor seguro. Nunca coloque chaves de API neste arquivo.</div>
+  <section class="tools" aria-label="Ferramentas">
+    <button class="tool" data-mode="chat"><span>🧠</span><b>Conversar com IA</b></button>
+    <button class="tool" data-mode="video"><span>🎬</span><b>Criar vídeo</b></button>
+    <button class="tool" data-mode="roblox"><span>🎮</span><b>Criar jogo Roblox</b></button>
+  </section>
+  <section class="chat">
+    <div class="chathead"><strong id="modeTitle">🧠 Conversa inteligente</strong><span class="status" id="status">Pronto</span></div>
+    <div id="messages" aria-live="polite">
+      <div class="msg bot">Olá! Sou a interface da LUIS PRO. Posso ajudar a planejar projetos, escrever código e criar ideias. Escolha uma ferramenta e diga o que você quer fazer.</div>
+    </div>
+    <div class="composer">
+      <textarea id="prompt" placeholder="Escreva sua mensagem..." aria-label="Sua mensagem"></textarea>
+      <div class="actions">
+        <button class="btn secondary" id="clearBtn" type="button">Limpar</button>
+        <button class="btn primary" id="sendBtn" type="button">Enviar ↗</button>
+      </div>
+    </div>
+  </section>
+  <p class="small">Conexão esperada: <code>POST /api/chat</code> com JSON <code>{"message":"...","mode":"chat"}</code> e resposta JSON <code>{"reply":"..."}</code>. O servidor deve guardar as chaves em variáveis de ambiente, limitar uso e validar pedidos.</p>
+</main>
+<script>
+(() => {
+  // Aponte para a URL do SEU backend HTTPS. Não coloque API keys aqui.
+  const API_URL = "curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent" \
+  -H 'Content-Type: application/json' \
+  -H 'X-goog-api-key: AQ.Ab8RN6Lk3qIiD5TXd_8Ac8MZgJx6ckK35Ij3DO4cUbcc747d3g' \
+  -X POST \
+  -d '{
+    "contents": [
+      {
+        "parts": [
+          {
+            "text": "Explain how AI works in a few words"
+          }
+        ]
+      }
+    ]
+  }'";
+  const modes = {
+    chat: {title:"🧠 Conversa inteligente", placeholder:"Pergunte qualquer coisa ou peça ajuda com um projeto...", prefix:""},
+    video: {title:"🎬 Criador de vídeos", placeholder:"Descreva o vídeo: tema, estilo, duração e cenas...", prefix:"Ajude-me a criar um vídeo. Gere um roteiro detalhado, cenas, narração e prompts visuais. Se houver uma API de vídeo conectada no servidor, solicite a geração do vídeo. Pedido: "},
+    roblox: {title:"🎮 Criador de jogos Roblox", placeholder:"Descreva o jogo, as mecânicas e os sistemas que quer criar...", prefix:"Ajude-me a desenvolver um jogo Roblox usando Luau. Entregue scripts completos, indique se cada script é Script, LocalScript ou ModuleScript, diga onde colocá-los no Roblox Studio e explique testes e permissões. Não afirme que publicou o jogo se isso não ocorreu. Pedido: "}
+  };
+  let mode = "chat";
+  const messages = document.getElementById("messages");
+  const prompt = document.getElementById("prompt");
+  const sendBtn = document.getElementById("sendBtn");
+  const status = document.getElementById("status");
+  function addMessage(text, who) {
+    const el = document.createElement("div");
+    el.className = "msg " + who;
+    el.textContent = text;
+    messages.appendChild(el);
+    messages.scrollTop = messages.scrollHeight;
+    return el;
+  }
+  function setMode(next) {
+    mode = next;
+    document.getElementById("modeTitle").textContent = modes[mode].title;
+    prompt.placeholder = modes[mode].placeholder;
+    document.querySelectorAll(".tool").forEach(b => {
+      b.style.borderColor = b.dataset.mode === mode ? "#8b7cff" : "var(--line)";
+    });
+    prompt.focus();
+  }
+  document.querySelectorAll(".tool").forEach(b => b.addEventListener("click", () => setMode(b.dataset.mode)));
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    messages.replaceChildren();
+    addMessage("Histórico desta tela limpo. Como posso ajudar?", "bot");
+  });
+  async function send() {
+    const raw = prompt.value.trim();
+    if (!raw || sendBtn.disabled) return;
+    addMessage(raw, "user");
+    prompt.value = "";
+    sendBtn.disabled = true;
+    status.textContent = "Pensando…";
+    const thinking = addMessage("Preparando resposta…", "bot");
+    try {
+      const response = await fetch(API_URL, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({message:modes[mode].prefix + raw, mode})
+      });
+      if (!response.ok) throw new Error("O servidor respondeu HTTP " + response.status);
+      const data = await response.json();
+      const answer = data.reply || data.output || data.message;
+      if (typeof answer !== "string" || !answer.trim()) throw new Error("Resposta inválida do servidor.");
+      thinking.textContent = answer;
+      const copy = document.createElement("button");
+      copy.className = "btn secondary";
+      copy.style.marginTop = "8px";
+      copy.textContent = "Copiar resposta";
+      copy.addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(answer); copy.textContent = "Copiado!"; }
+        catch { copy.textContent = "Não foi possível copiar"; }
+      });
+      const wrap = document.createElement("div");
+      wrap.appendChild(copy);
+      thinking.appendChild(wrap);
+      status.textContent = "Conectado";
+    } catch (err) {
+      thinking.textContent = "Não consegui conectar à IA. Esta página precisa de um backend funcionando em " + API_URL + ".\n\nDetalhe: " + err.message + "\n\nDica: abra a página pelo endereço HTTPS do seu servidor, não como arquivo local. Nunca resolva isso colocando a chave secreta no HTML.";
+      status.textContent = "Sem conexão";
+    } finally {
+      sendBtn.disabled = false;
+      prompt.focus();
+    }
+  }
+  sendBtn.addEventListener("click", send);
+  prompt.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+  setMode("chat");
+})();
+</script>
+</body>
+</html>
